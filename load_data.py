@@ -80,7 +80,7 @@ class LoadData:
             X_train_All: X input of training set,
             y_train_All: y input of training set
         """
-        initial_idx = np.array([], dtype=np.int)
+        initial_idx = np.array([], dtype=int)
         for i in range(10):
             idx = np.random.choice(
                 np.where(self.y_train_All == i)[0], size=2, replace=False

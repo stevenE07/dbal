@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from modAL.models import ActiveLearner
 
-from acquisition_functions import uniform, max_entropy, bald, var_ratios, mean_std
+from acquisition_functions import uniform, max_entropy, bald, var_ratios, mean_std,batch_bald
 
 
 def active_learning_procedure(
@@ -44,6 +44,7 @@ def active_learning_procedure(
         query_idx, query_instance = learner.query(
             X_pool, n_query=n_query, T=T, training=training
         )
+        #oraculo.
         learner.teach(X_pool[query_idx], y_pool[query_idx])
         X_pool = np.delete(X_pool, query_idx, axis=0)
         y_pool = np.delete(y_pool, query_idx, axis=0)
@@ -70,5 +71,6 @@ def select_acq_function(acq_func: int = 0) -> list:
         3: [bald],
         4: [var_ratios],
         5: [mean_std],
+        6: [batch_bald],
     }
     return acq_func_dict[acq_func]

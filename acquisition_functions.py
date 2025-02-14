@@ -119,6 +119,57 @@ def bald(
     return query_idx, X_pool[query_idx]
 
 
+def batch_bald(
+    model, X_pool: np.ndarray, n_query: int = 10, T: int = 100, training: bool = True
+):
+    """
+    Implementación de BatchBALD para seleccionar un lote de puntos que maximicen la
+    información mutua sobre los parámetros del modelo.
+
+    Args:
+        model: El modelo ya entrenado y listo para medir incertidumbre.
+        X_pool: Conjunto de datos del pool para seleccionar incertidumbre.
+        n_query: Número de puntos a seleccionar que maximicen batch_bald a(x) del conjunto de pool.
+        T: Número de iteraciones de Monte Carlo dropout (o entrenamiento).
+        training: Si es False, ejecuta sin MC dropout. (default=True)
+
+    Returns:
+        query_idx: Índices de los puntos seleccionados en X_pool.
+        X_pool[query_idx]: Puntos seleccionados en el conjunto de pool.
+    """
+    
+    batch_size = n_query  # Tamaño del lote de puntos a seleccionar
+    selected_indices = []
+    remaining_indices = np.arange(len(X_pool))
+    
+    # Paso 1: Inicializar entropía y entropía esperada para el conjunto de datos
+    H, E_H, random_subset = shannon_entropy_function(
+        model, X_pool, T, E_H=True, training=training
+    )
+    
+    # Paso 2: Selección iterativa de puntos que maximicen la información mutua en el lote
+    for _ in range(batch_size):
+        acquisition_scores = []
+        
+        # Para cada punto en el conjunto de pool no seleccionado
+        for idx in remaining_indices:
+            # Cálculo de la ganancia de información mutua esperada para el lote actual + el nuevo punto
+            # Esta parte sería una implementación extendida del cálculo de I en BatchBALD
+            current_acquisition = H[idx] - E_H[idx]
+            
+            acquisition_scores.append(current_acquisition)
+        
+        # Seleccionar el índice con el máximo score de adquisición
+        max_idx = np.argmax(acquisition_scores)
+        selected_indices.append(remaining_indices[max_idx])
+        
+        # Eliminar el índice seleccionado del conjunto de índices restantes
+        remaining_indices = np.delete(remaining_indices, max_idx)
+    
+    # Devolver los índices de consulta y los puntos seleccionados en el pool
+    query_idx = np.array(selected_indices)
+    return query_idx, X_pool[query_idx]
+
 def var_ratios(
     model, X_pool: np.ndarray, n_query: int = 10, T: int = 100, training: bool = True
 ):

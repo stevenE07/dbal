@@ -152,7 +152,7 @@ def main():
     parser.add_argument(
         "--experiments",
         type=int,
-        default=3,
+        default=1,
         metavar="E",
         help="number of experiments (default: 3)",
     )
